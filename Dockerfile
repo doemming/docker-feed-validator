@@ -1,8 +1,8 @@
 FROM ubuntu:14.04
 
-MAINTAINER Unboxed Consulting
-
-# Based on http://feedvalidator.org/docs/howto/install_and_run.html
+MAINTAINER bespire UG
+# based on https://hub.docker.com/r/unboxed/docker-feed-validator/
+# and http://feedvalidator.org/docs/howto/install_and_run.html
 # and https://medium.com/dev-tricks/apache-and-php-on-docker-44faef716150
 
 RUN apt-get update && apt-get -y upgrade
@@ -10,11 +10,11 @@ RUN apt-get -y install apache2-mpm-worker git python
 
 RUN apt-get clean
 
-RUN rm -rf /var/www
-RUN git clone https://github.com/rubys/feedvalidator.git /var/www/
-
-# ADD resource/apache.server.conf /etc/apache2/conf-available/server.conf
-
+RUN rm -rf /var/www/feedvalidator
+RUN git clone https://github.com/bor8/feedvalidator.git /var/www/feedvalidator \
+    && cd  /var/www/feedvalidator \
+    && git checkout tags/2016-10-27
+ 
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
 ENV APACHE_LOG_DIR /var/log/apache2
@@ -26,4 +26,5 @@ ADD resources/apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 RUN a2enmod cgi rewrite
 
 EXPOSE 80
-CMD /usr/sbin/apache2ctl -D FOREGROUND
+CMD rm -f /var/run/apache2/apache2.pid \
+    && /usr/sbin/apache2ctl -D FOREGROUND
